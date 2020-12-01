@@ -1,0 +1,48 @@
+class List[T] {
+  head: (ListNode[T] & mut) | (None & imm);
+  tail: (ListNode[T] & mut) | (None & imm);
+
+  create() : List[T] & iso {
+    var list = new List;
+    list.head = None.create();
+    list.tail = list.head;
+    list
+  }
+
+  // push_front(self: mut, x: T) {
+  //   var node = ListNode.create(x, self);
+  //   node.next = self.head;
+  //   self.head = node;
+  // }
+
+  push_back(self: mut, x: T) {
+    var node = ListNode.create(x, self);
+    match self.tail {
+      var tail: ListNode[T] => {
+        tail.next = node;
+      }
+      var _ : None => {}
+    };
+
+    self.tail = node;
+
+    match self.head {
+      var _ : ListNode[T] => {}
+      var _ : None => {
+        self.head = node;
+      }
+    }
+  }
+}
+
+class ListNode[T] {
+  value: T;
+  next: (ListNode[T] & mut) | (None & imm);
+
+  create(value: T, list: mut): ListNode[T] & mut {
+    var node = new ListNode in list;
+    node.value = value;
+    node.next = None.create();
+    node
+  }
+}

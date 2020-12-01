@@ -1,0 +1,42 @@
+use "../lib/list.verona"
+
+class Main
+{
+  // Pattern matching on a loop variable seems to cause lots of problems during
+  // type inference. Use recursion to work around this.
+  print_node(node: (ListNode[U64 & imm] & mut) | (None & imm))
+  {
+    match node {
+      var node: ListNode[U64 & imm] => {
+        Builtin.print1("{}\n", node.value);
+        Main.print_node(node.next);
+      }
+      var _: None => { }
+    }
+  }
+  print_list(list: List[U64 & imm] & mut) 
+  {
+    Main.print_node(list.head);
+  }
+
+  // Type inference was picking List[U64] as the return type of List.create(),
+  // instead of List[U64 & imm], even though the list got passed to print_list.
+  //
+  // We use a separate function to ascribe the type we actually want.
+  make_list(): List[U64 & imm] & iso {
+    List.create()
+  }
+
+  main() {
+    var data = mut-view (Main.make_list());
+    var c = 1;
+    while c {
+      match IO.read_u64() {
+        var x: U64 => data.push_back(x),
+        var _: None => c = 0,
+      };
+    };
+
+    Main.print_list(data);
+  }
+}
