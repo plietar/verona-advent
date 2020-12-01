@@ -1,0 +1,79 @@
+interface Comparable[T: imm]
+{
+  lt(self: imm, other: T): U64 & imm;
+}
+
+class TreeNode[T: imm] {
+  left: (TreeNode[T] & mut) | (None & imm);
+  value: T;
+  right: (TreeNode[T] & mut) | (None & imm);
+
+  create(value: T, parent: mut): TreeNode[T] & mut
+  {
+    var result = new TreeNode in parent;
+    result.value = value;
+    result.left = None.create();
+    result.right = None.create();
+    result
+  }
+}
+
+class Tree[T: Comparable[T] & imm] {
+  top: (TreeNode[T] & mut) | (None & imm);
+
+  create(): Tree[T] & iso {
+    var result = new Tree;
+    result.top = None.create();
+    result
+  }
+
+  insert(self: mut, value: T) {
+    self.top = self._insert(self.top = None.create(), value);
+  }
+
+  _insert(self: mut,
+          current: (TreeNode[T] & mut) | (None & imm),
+          value: T): (TreeNode[T] & mut)
+  {
+    match current
+    {
+      var e: None => TreeNode.create(value, self),
+      var n: TreeNode[T] => {
+        if value < n.value {
+          n.left = self._insert(n.left = None.create(), value);
+        } else {
+          if n.value < value {
+            n.right = self._insert(n.right = None.create(), value);
+          } else {
+          }
+        };
+        n
+      },
+    }
+  }
+
+  contains(self: mut, value: T): U64 & imm
+  {
+    self._contains(value, self.top)
+  }
+
+  _contains(self: mut, value: T, node: (TreeNode[T] & mut) | (None & imm)): U64 & imm
+  {
+    match node
+    {
+      var e: None => 0,
+      var n: TreeNode[T] => {
+        if value < n.value {
+          self._contains(value, n.left)
+        } else {
+          if n.value < value {
+          self._contains(value, n.right)
+          } else {
+            1
+          }
+        }
+      }
+    }
+  }
+}
+

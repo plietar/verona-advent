@@ -1,4 +1,5 @@
 use "../lib/list.verona"
+use "../lib/tree.verona"
 
 class Main
 {
@@ -27,8 +28,28 @@ class Main
     List.create()
   }
 
+  search_node(node: (ListNode[U64 & imm] & mut) | (None & imm), seen: Tree[U64 & imm] & mut): U64 & imm
+  {
+    match node {
+      var node: ListNode[U64 & imm] => {
+        var partner = 2020 - node.value;
+        if seen.contains(partner) {
+          partner * node.value
+        } else {
+          seen.insert(node.value);
+          Main.search_node(node.next, seen)
+        }
+      }
+      var _: None => {
+        0
+      }
+    }
+  }
+
   main() {
     var data = mut-view (Main.make_list());
+    var seen = mut-view (Tree.create());
+
     var c = 1;
     while c {
       match IO.read_u64() {
@@ -37,6 +58,7 @@ class Main
       };
     };
 
-    Main.print_list(data);
+    var result = Main.search_node(data.head, seen);
+    Builtin.print1("{}\n", result);
   }
 }
