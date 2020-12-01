@@ -75,5 +75,10 @@ class Tree[T: Comparable[T] & imm] {
       }
     }
   }
+
+  clear(self: mut)
+  {
+    self.top = None.create();
+  }
 }
 

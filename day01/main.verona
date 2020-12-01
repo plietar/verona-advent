@@ -28,21 +28,38 @@ class Main
     List.create()
   }
 
-  search_node(node: (ListNode[U64 & imm] & mut) | (None & imm), seen: Tree[U64 & imm] & mut): U64 & imm
+  part1(node: (ListNode[U64 & imm] & mut) | (None & imm), seen: Tree[U64 & imm] & mut, target: U64 & imm): (U64 & imm) | (None & imm)
   {
     match node {
       var node: ListNode[U64 & imm] => {
-        var partner = 2020 - node.value;
+        var partner = target - node.value;
         if seen.contains(partner) {
           partner * node.value
         } else {
           seen.insert(node.value);
-          Main.search_node(node.next, seen)
+          Main.part1(node.next, seen, target)
         }
       }
-      var _: None => {
-        0
+      var _: None => None.create(),
+    }
+  }
+
+  part2(data: List[U64 & imm] & mut, node: (ListNode[U64 & imm] & mut) | (None & imm)): (U64 & imm) | (None & imm)
+  {
+    match node {
+      var node: ListNode[U64 & imm] => {
+        var target = 2020 - node.value;
+        var seen = mut-view (Tree.create());
+        match Main.part1(data.head, seen, target) {
+          var product: U64 => {
+            product * node.value
+          }
+          var _: None => {
+            Main.part2(data, node.next)
+          }
+        }
       }
+      var _: None => None.create(),
     }
   }
 
@@ -58,7 +75,7 @@ class Main
       };
     };
 
-    var result = Main.search_node(data.head, seen);
-    Builtin.print1("{}\n", result);
+    Builtin.print1("Part 1: {}\n", Main.part1(data.head, seen, 2020));
+    Builtin.print1("Part 2: {}\n", Main.part2(data, data.head));
   }
 }
