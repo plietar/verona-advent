@@ -1,0 +1,52 @@
+use "../lib/parser.verona"
+
+class Main
+{
+  read_int(parser: Parser & mut): U64 & imm {
+    match parser.int() {
+      var v: U64 => v,
+      var _: EOF => {
+        Builtin.print("Unexpected EOF");
+        Builtin.abort()
+      }
+      var _: ParseError => {
+        Builtin.print("Parser error");
+        Builtin.abort()
+      }
+    }
+  }
+
+  main() {
+    var valid = 0;
+    var parser = mut-view (Parser.create());
+    parser.consume();
+    while parser.value != IO.eof() {
+      var low = Main.read_int(parser);
+      parser.consume(); // '-'
+      var high = Main.read_int(parser);
+      parser.skip_ws();
+      var c = parser.value;
+      parser.consume();
+
+      parser.consume(); // ':'
+      parser.skip_ws();
+
+      var occurences = 0;
+      while parser.value != 10 {
+        if parser.value == c {
+          occurences = occurences + 1;
+        } else {};
+        parser.consume();
+      };
+
+      if (occurences >= low) && (occurences <= high) {
+        valid = valid + 1;
+      } else { };
+
+      Builtin.print4("{} - {} {}: {}\n", low, high, c, occurences);
+      parser.skip_ws();
+    };
+
+    Builtin.print1("Result: {}\n", valid);
+  }
+}

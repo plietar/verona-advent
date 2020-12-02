@@ -1,0 +1,63 @@
+class EOF {
+  create(): EOF & imm { Builtin.freeze(new EOF) }
+}
+class ParseError {
+  create(): ParseError & imm { Builtin.freeze(new ParseError) }
+}
+
+class Parser
+{
+  value: U64 & imm;
+
+  create(): Parser & iso
+  {
+    var p = new Parser;
+    p.value = IO.eof();
+    p
+  }
+
+  consume(self: mut): U64 & imm
+  {
+    self.value = IO.read_char();
+    self.value != IO.eof()
+  }
+
+  int(self: mut): (U64 & imm) | (EOF & imm) | (ParseError & imm)
+  {
+    self.skip_ws();
+    if self.value == IO.eof() {
+      EOF.create()
+    } else {
+      if Parser.is_digit(self.value)
+      {
+        var result = 0;
+        while Parser.is_digit(self.value)
+        {
+          // 48 is ASCII for '0'
+          result = (result * 10) + (self.value - 48);
+          self.consume();
+        };
+        result
+      }
+      else
+      {
+        ParseError.create()
+      }
+    }
+  }
+
+  skip_ws(self: mut)
+  {
+    while Parser.is_whitespace(self.value) {
+      self.consume();
+    }
+  }
+
+  is_whitespace(value: U64 & imm): U64 & imm {
+    (value == 10) || (value == 32)
+  }
+
+  is_digit(value: U64 & imm): U64 & imm {
+    (value >= 48) && (value < 58)
+  }
+}
