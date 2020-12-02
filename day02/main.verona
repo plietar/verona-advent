@@ -17,7 +17,9 @@ class Main
   }
 
   main() {
-    var valid = 0;
+    var valid1 = 0; // Part 1 result
+    var valid2 = 0; // Part 2 result
+
     var parser = mut-view (Parser.create());
     while ({ parser.skip_ws(); parser.peek() != IO.eof() }) {
       var low = Main.read_int(parser);
@@ -29,21 +31,31 @@ class Main
       parser.consume(); // ':'
       parser.skip_ws();
 
-      var occurences = 0;
+      var occurences1 = 0; // Occurences of the character at any position.
+      var occurences2 = 0; // Occurences of the character at positions `low` or `high`.
+
+      var pos = 0;
       while parser.peek() != 10 {
+        pos = pos + 1;
         if parser.peek() == c {
-          occurences = occurences + 1;
+          occurences1 = occurences1 + 1;
+          if (pos == low) || (pos == high) {
+            occurences2 = occurences2 + 1;
+          }
         } else {};
         parser.consume();
       };
 
-      if (occurences >= low) && (occurences <= high) {
-        valid = valid + 1;
+      if (occurences1 >= low) && (occurences1 <= high) {
+        valid1 = valid1 + 1;
       } else { };
 
-      Builtin.print4("{} - {} {}: {}\n", low, high, c, occurences);
+      if occurences2 == 1 {
+        valid2 = valid2 + 1;
+      } else { };
     };
 
-    Builtin.print1("Result: {}\n", valid);
+    Builtin.print1("Part 1: {}\n", valid1);
+    Builtin.print1("Part 2: {}\n", valid2);
   }
 }
