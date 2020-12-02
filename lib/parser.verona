@@ -32,7 +32,7 @@ class Parser
     (self._value = IO.read_char())
   }
 
-  int(self: mut): (U64 & imm) | (EOF & imm) | (ParseError & imm)
+  try_int(self: mut): (U64 & imm) | (EOF & imm) | (ParseError & imm)
   {
     self.skip_ws();
     if self.peek() == IO.eof() {
@@ -55,6 +55,21 @@ class Parser
       }
     }
   }
+
+  int(self: mut): U64 & imm {
+    match self.try_int() {
+      var v: U64 => v,
+      var _: EOF => {
+        Builtin.print("Unexpected EOF");
+        Builtin.abort()
+      }
+      var _: ParseError => {
+        Builtin.print("Parser error");
+        Builtin.abort()
+      }
+    }
+  }
+
 
   skip_ws(self: mut)
   {

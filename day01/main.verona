@@ -1,25 +1,9 @@
 use "../lib/list.verona"
 use "../lib/tree.verona"
+use "../lib/parser.verona"
 
 class Main
 {
-  // Pattern matching on a loop variable seems to cause lots of problems during
-  // type inference. Use recursion to work around this.
-  print_node(node: (ListNode[U64 & imm] & mut) | (None & imm))
-  {
-    match node {
-      var node: ListNode[U64 & imm] => {
-        Builtin.print1("{}\n", node.value);
-        Main.print_node(node.next);
-      }
-      var _: None => { }
-    }
-  }
-  print_list(list: List[U64 & imm] & mut) 
-  {
-    Main.print_node(list.head);
-  }
-
   // Type inference was picking List[U64] as the return type of List.create(),
   // instead of List[U64 & imm], even though the list got passed to print_list.
   //
@@ -28,7 +12,14 @@ class Main
     List.create()
   }
 
-  part1(node: (ListNode[U64 & imm] & mut) | (None & imm), seen: Tree[U64 & imm] & mut, target: U64 & imm): (U64 & imm) | (None & imm)
+  part1(node: (ListNode[U64 & imm] & mut) | (None & imm), target: U64 & imm): (U64 & imm) | (None & imm)
+  {
+    Main._part1(node, mut-view (Tree.create()), target)
+  }
+
+  // Pattern matching on a loop variable seems to cause lots of problems during
+  // type inference. Use recursion to work around this.
+  _part1(node: (ListNode[U64 & imm] & mut) | (None & imm), seen: Tree[U64 & imm] & mut, target: U64 & imm): (U64 & imm) | (None & imm)
   {
     match node {
       var node: ListNode[U64 & imm] => {
@@ -37,25 +28,25 @@ class Main
           partner * node.value
         } else {
           seen.insert(node.value);
-          Main.part1(node.next, seen, target)
+          Main._part1(node.next, seen, target)
         }
       }
       var _: None => None.create(),
     }
   }
 
-  part2(data: List[U64 & imm] & mut, node: (ListNode[U64 & imm] & mut) | (None & imm)): (U64 & imm) | (None & imm)
+  part2(node: (ListNode[U64 & imm] & mut) | (None & imm)): (U64 & imm) | (None & imm)
   {
     match node {
       var node: ListNode[U64 & imm] => {
         var target = 2020 - node.value;
         var seen = mut-view (Tree.create());
-        match Main.part1(data.head, seen, target) {
+        match Main.part1(node.next, target) {
           var product: U64 => {
             product * node.value
           }
           var _: None => {
-            Main.part2(data, node.next)
+            Main.part2(node.next)
           }
         }
       }
@@ -63,19 +54,25 @@ class Main
     }
   }
 
-  main() {
-    var data = mut-view (Main.make_list());
-    var seen = mut-view (Tree.create());
+  // 224436
+  // 303394260
 
-    var c = 1;
-    while c {
-      match IO.read_u64() {
-        var x: U64 => data.push_back(x),
-        var _: None => c = 0,
-      };
+  load(): List[U64 & imm] & iso {
+    var data = Main.make_list();
+    var parser = mut-view (Parser.create());
+
+    while ({ parser.skip_ws(); parser.peek() != IO.eof() }) {
+      var value = parser.int();
+      (mut-view data).push_back(value);
     };
 
-    Builtin.print1("Part 1: {}\n", Main.part1(data.head, seen, 2020));
-    Builtin.print1("Part 2: {}\n", Main.part2(data, data.head));
+    data
+  }
+
+  main() {
+    var data = mut-view (Main.load());
+
+    Builtin.print1("Part 1: {}\n", Main.part1(data.head, 2020));
+    Builtin.print1("Part 2: {}\n", Main.part2(data.head));
   }
 }

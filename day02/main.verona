@@ -2,29 +2,15 @@ use "../lib/parser.verona"
 
 class Main
 {
-  read_int(parser: Parser & mut): U64 & imm {
-    match parser.int() {
-      var v: U64 => v,
-      var _: EOF => {
-        Builtin.print("Unexpected EOF");
-        Builtin.abort()
-      }
-      var _: ParseError => {
-        Builtin.print("Parser error");
-        Builtin.abort()
-      }
-    }
-  }
-
   main() {
     var valid1 = 0; // Part 1 result
     var valid2 = 0; // Part 2 result
 
     var parser = mut-view (Parser.create());
     while ({ parser.skip_ws(); parser.peek() != IO.eof() }) {
-      var low = Main.read_int(parser);
+      var low = parser.int();
       parser.consume(); // '-'
-      var high = Main.read_int(parser);
+      var high = parser.int();
       parser.skip_ws();
       var c = parser.consume();
 
