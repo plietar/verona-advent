@@ -7,34 +7,44 @@ class ParseError {
 
 class Parser
 {
-  value: U64 & imm;
+  _value: U64 & imm;
 
   create(): Parser & iso
   {
     var p = new Parser;
-    p.value = IO.eof();
+    p._value = IO.eof();
     p
   }
 
-  consume(self: mut): U64 & imm
-  {
-    self.value = IO.read_char();
-    self.value != IO.eof()
+  peek(self: mut): U64 & imm {
+    if self._value == IO.eof() {
+      self._value = IO.read_char();
+    } else { };
+
+    self._value
+  }
+
+  consume(self: mut): U64 & imm {
+    if self._value == IO.eof() {
+      self._value = IO.read_char();
+    } else { };
+
+    (self._value = IO.read_char())
   }
 
   int(self: mut): (U64 & imm) | (EOF & imm) | (ParseError & imm)
   {
     self.skip_ws();
-    if self.value == IO.eof() {
+    if self.peek() == IO.eof() {
       EOF.create()
     } else {
-      if Parser.is_digit(self.value)
+      if Parser.is_digit(self.peek())
       {
         var result = 0;
-        while Parser.is_digit(self.value)
+        while Parser.is_digit(self.peek())
         {
           // 48 is ASCII for '0'
-          result = (result * 10) + (self.value - 48);
+          result = (result * 10) + (self.peek() - 48);
           self.consume();
         };
         result
@@ -48,7 +58,7 @@ class Parser
 
   skip_ws(self: mut)
   {
-    while Parser.is_whitespace(self.value) {
+    while Parser.is_whitespace(self.peek()) {
       self.consume();
     }
   }

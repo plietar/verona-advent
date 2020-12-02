@@ -19,21 +19,19 @@ class Main
   main() {
     var valid = 0;
     var parser = mut-view (Parser.create());
-    parser.consume();
-    while parser.value != IO.eof() {
+    while ({ parser.skip_ws(); parser.peek() != IO.eof() }) {
       var low = Main.read_int(parser);
       parser.consume(); // '-'
       var high = Main.read_int(parser);
       parser.skip_ws();
-      var c = parser.value;
-      parser.consume();
+      var c = parser.consume();
 
       parser.consume(); // ':'
       parser.skip_ws();
 
       var occurences = 0;
-      while parser.value != 10 {
-        if parser.value == c {
+      while parser.peek() != 10 {
+        if parser.peek() == c {
           occurences = occurences + 1;
         } else {};
         parser.consume();
@@ -44,7 +42,6 @@ class Main
       } else { };
 
       Builtin.print4("{} - {} {}: {}\n", low, high, c, occurences);
-      parser.skip_ws();
     };
 
     Builtin.print1("Result: {}\n", valid);
