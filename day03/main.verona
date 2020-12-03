@@ -1,0 +1,84 @@
+use "../lib/parser.verona"
+use "../lib/list.verona"
+
+class Slope
+{
+  delta_x: U64 & imm;
+  delta_y: U64 & imm;
+  trees: U64 & imm;
+
+  create(x: U64 & imm, y: U64 & imm): Slope & iso {
+    var result = new Slope;
+    result.delta_x = x;
+    result.delta_y = y;
+    result.trees = 0;
+    result
+  }
+}
+
+class Main
+{
+  handle_tree(it: (ListNode[Slope & iso] & mut) | (None & imm), x: U64 & imm, y: U64 & imm, width: U64 & imm) {
+    match it {
+      var node: ListNode[Slope & iso] => {
+        var slope = node.value;
+        if (y % slope.delta_y) == 0 {
+          var intersect = (slope.delta_x * (y / slope.delta_y)) % width;
+          if x == intersect {
+            slope.trees = slope.trees + 1;
+          } else {}
+        } else {};
+
+        Main.handle_tree(node.next, x, y, width);
+      }
+      var _: None => {},
+    }
+  }
+
+  get_result(it: (ListNode[Slope & iso] & mut) | (None & imm)): U64 & imm {
+    match it {
+      var node: ListNode[Slope & iso] => {
+        var slope = node.value;
+        Builtin.print3("Slope({}, {}): {}\n", slope.delta_x, slope.delta_y, slope.trees);
+        Main.get_result(node.next) * slope.trees
+      }
+      var _: None => 1,
+    }
+  }
+
+  main() {
+    var parser = mut-view (Parser.create());
+    var slopes = mut-view (List.create());
+
+    slopes.push_back(Slope.create(1, 1));
+    var part1 = slopes.push_back(Slope.create(3, 1));
+    slopes.push_back(Slope.create(5, 1));
+    slopes.push_back(Slope.create(7, 1));
+    slopes.push_back(Slope.create(1, 2));
+
+    var x = 0;
+    var y = 0;
+    var width = None.create();
+
+    while parser.peek() != IO.eof() {
+      var c = parser.consume();
+      if c == 10 { // newline
+        width = x;
+        y = y + 1;
+        x = 0;
+      } else {
+        if c == 35 {
+          match width {
+            var w: U64 => Main.handle_tree(slopes.head, x, y, w),
+            var _: None => {}
+          };
+        } else {};
+        x = x + 1;
+      }
+    };
+
+    var total = Main.get_result(slopes.head);
+    Builtin.print1("Part 1: {}\n", part1.trees);
+    Builtin.print1("Part 2: {}\n", total);
+  }
+}

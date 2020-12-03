@@ -9,13 +9,7 @@ class List[T] {
     list
   }
 
-  // push_front(self: mut, x: T) {
-  //   var node = ListNode.create(x, self);
-  //   node.next = self.head;
-  //   self.head = node;
-  // }
-
-  push_back(self: mut, x: T) {
+  push_back(self: mut, x: T): mut->T {
     var node = ListNode.create(x, self);
     match self.tail {
       var tail: ListNode[T] => {
@@ -31,7 +25,9 @@ class List[T] {
       var _ : None => {
         self.head = node;
       }
-    }
+    };
+
+    node.value
   }
 }
 
