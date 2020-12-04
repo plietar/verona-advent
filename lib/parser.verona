@@ -85,4 +85,9 @@ class Parser
   is_digit(value: U64 & imm): U64 & imm {
     (value >= 48) && (value < 58)
   }
+
+  is_alpha(value: U64 & imm): U64 & imm {
+    ((value >= 65) && (value <= 90))
+    || ((value >= 97) && (value <= 122))
+  }
 }

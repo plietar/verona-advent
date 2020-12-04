@@ -1,0 +1,17 @@
+class Tricode {
+  amb(): U64 & imm { 6384994 }
+  blu(): U64 & imm { 6450293 }
+  brn(): U64 & imm { 6451822 }
+  gry(): U64 & imm { 6779513 }
+  grn(): U64 & imm { 6779502 }
+  hzl(): U64 & imm { 6847084 }
+  oth(): U64 & imm { 7304296 }
+  byr(): U64 & imm { 6453618 }
+  cid(): U64 & imm { 6515044 }
+  ecl(): U64 & imm { 6644588 }
+  eyr(): U64 & imm { 6650226 }
+  hcl(): U64 & imm { 6841196 }
+  hgt(): U64 & imm { 6842228 }
+  iyr(): U64 & imm { 6912370 }
+  pid(): U64 & imm { 7367012 }
+}
