@@ -1,0 +1,65 @@
+use "../lib/parser.verona"
+use "../lib/tree.verona"
+
+class Main
+{
+  read_row(parser: Parser & mut): U64 & imm {
+    var c1 = parser.consume() == 66;
+    var c2 = parser.consume() == 66;
+    var c3 = parser.consume() == 66;
+    var c4 = parser.consume() == 66;
+    var c5 = parser.consume() == 66;
+    var c6 = parser.consume() == 66;
+    var c7 = parser.consume() == 66;
+
+    (c1 * 64) +
+    (c2 * 32) +
+    (c3 * 16) +
+    (c4 * 8) +
+    (c5 * 4) +
+    (c6 * 2) +
+    c7
+  }
+
+  read_col(parser: Parser & mut): U64 & imm {
+    var c1 = parser.consume() == 82;
+    var c2 = parser.consume() == 82;
+    var c3 = parser.consume() == 82;
+
+    (c1 * 4) + (c2 * 2) + c3
+  }
+
+  read_seat(parser: Parser & mut): U64 & imm {
+    var row = Main.read_row(parser);
+    var col = Main.read_col(parser);
+    // Builtin.print2("{}, {}\n", row, col);
+    (row * 8) + col
+  }
+
+  make_tree(): Tree[U64 & imm] & iso {
+    Tree.create()
+  }
+  main() {
+    var parser = mut-view (Parser.create());
+    var tree = mut-view (Main.make_tree());
+
+    var max = 0;
+    while ({ parser.skip_ws(); parser.peek() != IO.eof() }) {
+      var seat = Main.read_seat(parser);
+      tree.insert(seat);
+      if seat > max {
+        max = seat;
+      } else {}
+    };
+    Builtin.print1("Part 1: {}\n", max);
+
+    var i = 0;
+    while i < 1024 {
+      if tree.contains(i - 1) && (tree.contains(i) == 0) && tree.contains(i + 1) {
+        Builtin.print1("Part 2: {}\n", i);
+        i = 1024;
+      };
+      i = i + 1;
+    }
+  }
+}
