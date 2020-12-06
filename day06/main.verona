@@ -1,0 +1,60 @@
+use "../lib/parser.verona"
+
+class Main
+{
+  bitcount(value: U64 & imm): U64 & imm {
+    var result = 0;
+    while value != 0 {
+      result = result + (value & 1);
+      value = value >> 1;
+    };
+    result
+  }
+
+  read_row(parser: Parser & mut): (U64 & imm) {
+    var result = 0;
+    while (parser.peek() != 10) && (parser.peek() != IO.eof()) {
+      var c = parser.consume() - 97; // 'a'
+      result = result | (1 << c);
+    };
+    parser.consume();
+    result
+  }
+
+  read_group(parser: Parser & mut): Pair & imm {
+    var part1 = 0;
+    var part2 = (1<<27) - 1;
+    while (parser.peek() != 10) && (parser.peek() != IO.eof()) {
+      var row = Main.read_row(parser);
+      part1 = part1 | row;
+      part2 = part2 & row;
+    };
+    parser.consume();
+    Pair.create(part1, part2)
+  }
+
+  main() {
+    var parser = mut-view (Parser.create());
+    var part1 = 0;
+    var part2 = 0;
+    while parser.peek() != IO.eof() {
+      var group = Main.read_group(parser);
+      part1 = part1 + Main.bitcount(group.fst);
+      part2 = part2 + Main.bitcount(group.snd);
+    };
+    Builtin.print1("Part 1: {}\n", part1);
+    Builtin.print1("Part 2: {}\n", part2);
+  }
+}
+
+class Pair {
+  fst: U64 & imm;
+  snd: U64 & imm;
+
+  create(fst: U64 & imm, snd: U64 & imm): Pair & imm {
+    var pair = new Pair;
+    pair.fst = fst;
+    pair.snd = snd;
+    Builtin.freeze(pair)
+  }
+}
